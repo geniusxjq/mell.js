@@ -1,4 +1,6 @@
-﻿// JavaScript Document
+// JavaScript Document
+
+// JavaScript Document
 /*
 --------------------------------
 
@@ -105,7 +107,7 @@ Mell.MapCall = function (mapcall_array, callback){//扫描数组回调
 Mell.Each=function (each_array, callback){//逐个执行回调
 	
   //each_array:数组[1,2,3]或对象{n:1,m:2} 。callback:回调。示例：Mell.Each({n:1,m:2},function(name,value){})
-		
+
 	var length=each_array.length;
 	
 	var	type = typeof each_array;
@@ -1304,7 +1306,7 @@ Mell.Cookie={
 	},
 	
 	//添加cookie
-	
+
 	set:function(name,value,hours,path){
 	
 		var str = name + "=" + escape(value)+(path? ";path="+path:";path=/;");
@@ -1345,21 +1347,27 @@ Mell.Cookie={
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++切换/开关(Mell.Toggle)++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Mell.Toggle=function(o,on_callback,off_callback){
-		
-	  var status=o["mell-toggle"];
-	  	  
-	  on_callback&&on_callback!=o["mell-toggle-on-callback"]?
-	  o["mell-toggle-on-callback"]=on_callback:false;
-	  
-	  off_callback&&off_callback!=o["mell-toggle-off-callback"]?
-	  o["mell-toggle-off-callback"]=off_callback:false;
+Mell.Toggle=function(o,on_callback,off_callback,is_init){
 	
-	  if(arguments.callee.caller&&this!="Ready"){
-	  
-		  (!status||status=="off")?Mell.Toggle.on(o):Mell.Toggle.off(o);	
-	  
-	  }
+	var has_caller=arguments.callee.caller?true:false;
+	
+	Mell.MapCall(o,function(o){
+		
+		var status=o["mell-toggle"];
+			
+		on_callback&&on_callback!=o["mell-toggle-on-callback"]?
+		o["mell-toggle-on-callback"]=on_callback:false;
+		
+		off_callback&&off_callback!=o["mell-toggle-off-callback"]?
+		o["mell-toggle-off-callback"]=off_callback:false;
+  
+		if(has_caller&&!is_init){
+	   
+			(!status||status=="off")?Mell.Toggle.on(o):Mell.Toggle.off(o);
+		
+		}
+		
+	});
 	  
 	 return arguments.callee;
 				
@@ -1369,13 +1377,17 @@ Mell.Toggle=function(o,on_callback,off_callback){
 
 Mell.Toggle.on=function(o){
 	
-	if("mell-toggle" in o==false||o["mell-toggle"]=="off"){
+	Mell.MapCall(o,function(o){
 		
-		o["mell-toggle"]="on";
+		if("mell-toggle" in o==false||o["mell-toggle"]=="off"){
+			
+			o["mell-toggle"]="on";
+			
+			o["mell-toggle-on-callback"].call(o,o)||false;
+			
+		}
 		
-		o["mell-toggle-on-callback"].call(o,o)||false;
-		
-	}
+	});
 		
 	return arguments.callee;
 	
@@ -1385,13 +1397,17 @@ Mell.Toggle.on=function(o){
 
 Mell.Toggle.off=function(o){
 	
-	if("mell-toggle" in o&&o["mell-toggle"]=="on"){
+	Mell.MapCall(o,function(o){
 		
-		o["mell-toggle"]="off";
+		if("mell-toggle" in o&&o["mell-toggle"]=="on"){
+			
+			o["mell-toggle"]="off";
+			
+			o["mell-toggle-off-callback"].call(o,o)||false;
+			
+		}
 		
-		o["mell-toggle-off-callback"].call(o,o)||false;
-		
-	}
+	});
 		
 	return arguments.callee;
 			
@@ -1453,7 +1469,7 @@ Mell.Attr={
 
 Mell.Style={
 	
-	toggle:function(o,on_property,on_callback,off_property,off_callback){
+	toggle:function(o,on_property,on_callback,off_property,off_callback,is_init){
 		
 		if("Toggle" in Mell==false){return;}
 		
@@ -1469,7 +1485,7 @@ Mell.Style={
 			
 			off_callback?off_callback.call(o,o):false;
 			
-		});
+		},is_init);
 		
 		return arguments.callee;
 			
@@ -1616,10 +1632,10 @@ Mell.Style={
 
 Mell.ClassName={
 	
-	toggle:function(o,on_className,on_callback,off_className,off_callback){
+	toggle:function(o,on_className,on_callback,off_className,off_callback,is_init){
 		
 		if("Toggle" in Mell==false){return;}
-		
+				
 		Mell.Toggle(o,function(o){
 							   
 			Mell.ClassName.remove(o,off_className);
@@ -1636,7 +1652,7 @@ Mell.ClassName={
 			
 			off_callback?off_callback.call(o,o):false;
 			
-		});
+		},is_init);
 		
 		return arguments.callee;
 			
@@ -1822,10 +1838,10 @@ Mell.Url={
 
 Mell.Load=function(url,callback,timeout_callback,timeout){
 	
-	  //_url:文件路径。
+	  //url:文件路径。
 	  //callback:成功回调function。
-	  //_timeout_callback：超时回调。
-	  //_timeout：超时时间（毫秒）。
+	  //timeout_callback：超时回调。
+	  //timeout：超时时间（毫秒）。
 						  
 	if(!url){return arguments.callee;}
 	
@@ -2544,9 +2560,9 @@ Mell.Display={
 		
 		getDisplayStatus:function(o){
 			
-			return (Mell.Style.get(o,"overflow")=="hidden"&&
-			Mell.Style.get(o,"visibility")=="hidden"||
-			Mell.Style.get(o,"display")=="none")?"hidden":"show";
+			return ((Mell.Style.get(o,"overflow")=="hidden"&&
+			Mell.Style.get(o,"visibility")=="hidden")||
+			(Mell.Style.get(o,"display")=="none"))?"hidden":"show";
 			
 		},
 		
@@ -2957,7 +2973,9 @@ Mell.Event={
 						
 		},
 		
-		add:function(o,types,selector,fn,data){//添加事件
+		//添加事件
+		
+		add:function(o,types,selector,fn,data){
 															
 			if(Mell.Type.isString(types)){
 				
@@ -3552,7 +3570,11 @@ Mell.Ready=function(callback){
 		
 	if (document.readyState=="complete"||document.readyState=="loaded"){
 		
-		return setTimeout(function(){callback.call("Ready");},1);
+		return setTimeout(function(){
+								   
+			  Mell.Ready.callFuntion(callback);
+		 
+		 },1);
 		
 	}
 	
@@ -3580,7 +3602,7 @@ Mell.Ready=function(callback){
 		
 		loopReady=null;
 		
-		callback.call("Ready");
+		  Mell.Ready.callFuntion(callback);
 		
 	}
 	
@@ -3592,11 +3614,17 @@ Mell.Ready=function(callback){
 
 Mell.Ready.readyList=[];
 
+Mell.Ready.callFuntion=function(fn){
+	
+	fn.call();
+	
+};
+
 Mell.Ready.runReadyList=function (){
   
   Mell.MapCall(Mell.Ready.readyList, function (callback){
 							 
-	  callback.call("Ready");
+	  Mell.Ready.callFuntion(callback);
 	  
   });
   
