@@ -2888,7 +2888,7 @@ Mell.Event={
 		
 	},
 	
-	off:function(o,types,selector,fn){//关闭事件
+	off:function(o,types,selector,fn){//移除事件
 						
 		Mell.MapCall(o,function(o){
 					
@@ -3510,7 +3510,7 @@ Mell.Event={
 			
 		},
 						
-		//停止全部
+		//阻止全部
 		
 		stopAll:function(e){
 			
